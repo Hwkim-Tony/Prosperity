@@ -5,7 +5,10 @@ from bs4 import BeautifulSoup
 excel_file = openpyxl.Workbook()
 excel_sheet = excel_file.active
 excel_sheet.column_dimensions['B'].width = 70
-excel_sheet.append(['Ranking','Name','price','provider'])
+excel_sheet.append(['Ranking','Name','price','provider','Link'])
+excel_sheet.column_dimensions['C'].width = 15
+excel_sheet.column_dimensions['D'].width = 20
+excel_sheet.column_dimensions['E'].width = 80
 
 url = 'http://corners.gmarket.co.kr/Bestsellers?viewType=G&groupCode=G06'
 res = requests.get(url)
@@ -23,6 +26,29 @@ for index, product in enumerate(products):
     soup_info = BeautifulSoup(res_info.content, 'html.parser')
     provider_info = soup_info.select_one('div.item-topinfo_headline > p > span.text__seller > a')
     
-    excel_sheet.append([index+1, title.get_text(), price.get_text(), provider_info.get_text()])
+    excel_sheet.append([index+1, title.get_text(), price.get_text(), provider_info.get_text(),title['href']])
+    excel_sheet.cell(row=index+2 , column=4).hyperlink = title['href']
+    
+
+cell_A1 = excel_sheet['A1']  #셀 선택하기
+cell_A1.alignment = openpyxl.styles.Alignment(horizontal='center')  #셀 정렬하기
+cell_A1.font = openpyxl.styles.Font(color='01579B')  #셀 폰트 색상 지정하기
+
+cell_B1 = excel_sheet['B1']
+cell_B1.alignment = openpyxl.styles.Alignment(horizontal='center')
+cell_B1.font = openpyxl.styles.Font(color='01579B')
+
+cell_C1 = excel_sheet['C1']
+cell_C1.alignment = openpyxl.styles.Alignment(horizontal='center')
+cell_C1.font = openpyxl.styles.Font(color='01579B')
+
+cell_D1 = excel_sheet['D1']
+cell_D1.alignment = openpyxl.styles.Alignment(horizontal='center')
+cell_D1.font = openpyxl.styles.Font(color='01579B')
+
+cell_E1 = excel_sheet['E1']
+cell_E1.alignment = openpyxl.styles.Alignment(horizontal='center')
+cell_E1.font = openpyxl.styles.Font(color='01579B')
+
 excel_file.save('Gmarket Best100 Electric 0215.xlsx')
 excel_file.close()
