@@ -1,0 +1,28 @@
+import requests
+import openpyxl
+from bs4 import BeautifulSoup
+
+excel_file = openpyxl.Workbook()
+excel_sheet = excel_file.active
+excel_sheet.column_dimensions['B'].width = 70
+excel_sheet.append(['Ranking','Name','price','provider'])
+
+url = 'http://corners.gmarket.co.kr/Bestsellers?viewType=G&groupCode=G06'
+res = requests.get(url)
+soup = BeautifulSoup(res.content, 'html.parser')
+
+bestlists = soup.select('div.best-list')
+bestitems = bestlists[1]  #bestlist 태그가 2개가 있으니, 그 중 두번째꺼를 가져오고 싶음
+products = bestitems.select('li')
+
+for index, product in enumerate(products):
+    title = product.select_one('a.itemname')
+    price = product.select_one('div.s-price > strong')
+    
+    res_info = requests.get(title['href'])
+    soup_info = BeautifulSoup(res_info.content, 'html.parser')
+    provider_info = soup_info.select_one('div.item-topinfo_headline > p > span.text__seller > a')
+    
+    excel_sheet.append([index+1, title.get_text(), price.get_text(), provider_info.get_text()])
+excel_file.save('Gmarket Best100 Electric 0215.xlsx')
+excel_file.close()
