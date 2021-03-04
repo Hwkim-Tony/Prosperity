@@ -1,0 +1,51 @@
+import requests
+import openpyxl
+from bs4 import BeautifulSoup
+
+excel_file = openpyxl.Workbook()
+excel_sheet = excel_file.active
+excel_sheet.column_dimensions['A'].width = 4
+excel_sheet.column_dimensions['B'].width = 50
+excel_sheet.column_dimensions['C'].width = 70
+excel_sheet.column_dimensions['D'].width = 28
+excel_sheet.column_dimensions['E'].width = 15
+excel_sheet.column_dimensions['G'].width = 50
+excel_sheet.append(['No','Name','Address','Type','Power','Parking','Time'])
+
+start, num = 1, 0
+for i in range(10):
+    start_num = start + i
+    service_key = 'nF3qbuXgZhdgL8CbJkEgWW%2F0UTP0puTygNDbqGMtKC8yeN9K%2Bkv%2FmIL7dB7IoVyJ8ASQC%2FO%2Fw2iVkwLHpDx7tg%3D%3D'
+    params = '&numofRows=10&zcode=11&pageNo=' + str(start_num)
+    url = 'http://apis.data.go.kr/B552584/EvCharger/getChargerInfo?ServiceKey=' + service_key + params
+
+    res = requests.get(url)
+    soup = BeautifulSoup(res.content, 'html.parser')
+    data = soup.select('item')
+    for item in data:
+        num += 1
+        name = item.select_one('statnm').get_text()
+        address = item.select_one('addr').get_text()
+        type = item.select_one('chgerId').get_text()
+        if type == '01':
+            type = 'DC차데모'
+        elif type == '02':
+            type = 'AC 완속'
+        elif type == '03':
+            type = 'DC차데모 + AC3상'
+        elif type == '04':
+            type = 'DC콤보'
+        elif type == '05':
+            type = 'DC차데모 + DC콤보'
+        elif type == '06':
+            type = 'DC차데모 + AC3상 + DC콤보'
+        elif type == '07':
+            type = 'AC3상'
+        power = item.select_one('powerType').get_text()
+        time = item.select_one('useTime').get_text()
+        parking = item.select_one('parkingFree').get_text()
+        print(num, name, address, type, power, time)
+        excel_sheet.append([num, name, address, type, power, parking, time])
+
+excel_file.save('EV Charger Info.xlsx')
+excel_file.close()
