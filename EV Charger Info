@@ -4,16 +4,17 @@ from bs4 import BeautifulSoup
 
 excel_file = openpyxl.Workbook()
 excel_sheet = excel_file.active
-excel_sheet.column_dimensions['A'].width = 4
-excel_sheet.column_dimensions['B'].width = 50
-excel_sheet.column_dimensions['C'].width = 70
-excel_sheet.column_dimensions['D'].width = 28
-excel_sheet.column_dimensions['E'].width = 15
+excel_sheet.column_dimensions['A'].width = 5
+excel_sheet.column_dimensions['B'].width = 48
+excel_sheet.column_dimensions['C'].width = 10
+excel_sheet.column_dimensions['D'].width = 70
+excel_sheet.column_dimensions['E'].width = 28
+excel_sheet.column_dimensions['F'].width = 15
 excel_sheet.column_dimensions['G'].width = 50
-excel_sheet.append(['No','Name','Address','Type','Power','Parking','Time'])
+excel_sheet.append(['No','Name','District','Address','type','power','Time'])
 
 start, num = 1, 0
-for i in range(10):
+for i in range(100):
     start_num = start + i
     service_key = 'nF3qbuXgZhdgL8CbJkEgWW%2F0UTP0puTygNDbqGMtKC8yeN9K%2Bkv%2FmIL7dB7IoVyJ8ASQC%2FO%2Fw2iVkwLHpDx7tg%3D%3D'
     params = '&numofRows=10&zcode=11&pageNo=' + str(start_num)
@@ -26,6 +27,7 @@ for i in range(10):
         num += 1
         name = item.select_one('statnm').get_text()
         address = item.select_one('addr').get_text()
+        district = address.split()[0:2]
         type = item.select_one('chgerId').get_text()
         if type == '01':
             type = 'DC차데모'
@@ -44,8 +46,10 @@ for i in range(10):
         power = item.select_one('powerType').get_text()
         time = item.select_one('useTime').get_text()
         parking = item.select_one('parkingFree').get_text()
-        print(num, name, address, type, power, time)
-        excel_sheet.append([num, name, address, type, power, parking, time])
-
-excel_file.save('EV Charger Info.xlsx')
+        if district[0] == "서울특별시":
+            excel_sheet.append([num, name, district[1], address, type, power, time])
+        else:
+            excel_sheet.append([num, name, district[0], address, type, power, time])
+            
+excel_file.save('EV Charger Info_Seoul_0307.xlsx')
 excel_file.close()
