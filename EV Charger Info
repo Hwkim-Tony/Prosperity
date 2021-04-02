@@ -28,7 +28,7 @@ for i in range(100):
         name = item.select_one('statnm').get_text()
         address = item.select_one('addr').get_text()
         district = address.split()[0:2]
-        type = item.select_one('chgerId').get_text()
+        type = item.select_one('chgertype').get_text()
         if type == '01':
             type = 'DC차데모'
         elif type == '02':
